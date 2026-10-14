@@ -12,7 +12,7 @@ The name is about the method and the material: many fonts melted into one, and t
 
 ## Status
 
-Version 0.2. Six styles, each a complete font: all of Averia (Latin, figures, punctuation, symbols and kerning) plus the Russian alphabet (А–я, Ё ё).
+Version 0.3. Six styles, each a complete font: all of Averia (Latin, figures, punctuation, symbols and kerning) plus the Russian alphabet (А–я, Ё ё) and №.
 
 | Style | Built on | File |
 | --- | --- | --- |
@@ -32,12 +32,12 @@ On a computer, install the `.ttf` files from the [download](https://github.com/K
 On the web, load the styles you use from jsDelivr:
 
 ```css
-@font-face { font-family: 'Splav'; font-weight: 300; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Light.woff2') format('woff2'); }
-@font-face { font-family: 'Splav'; font-weight: 400; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Regular.woff2') format('woff2'); }
-@font-face { font-family: 'Splav'; font-weight: 700; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Bold.woff2') format('woff2'); }
-@font-face { font-family: 'Splav'; font-weight: 300; font-style: italic; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-LightItalic.woff2') format('woff2'); }
-@font-face { font-family: 'Splav'; font-weight: 400; font-style: italic; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Italic.woff2') format('woff2'); }
-@font-face { font-family: 'Splav'; font-weight: 700; font-style: italic; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-BoldItalic.woff2') format('woff2'); }
+@font-face { font-family: 'Splav'; font-weight: 300; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.3.0/fonts/woff2/Splav-Light.woff2') format('woff2'); }
+@font-face { font-family: 'Splav'; font-weight: 400; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.3.0/fonts/woff2/Splav-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Splav'; font-weight: 700; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.3.0/fonts/woff2/Splav-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Splav'; font-weight: 300; font-style: italic; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.3.0/fonts/woff2/Splav-LightItalic.woff2') format('woff2'); }
+@font-face { font-family: 'Splav'; font-weight: 400; font-style: italic; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.3.0/fonts/woff2/Splav-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'Splav'; font-weight: 700; font-style: italic; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.3.0/fonts/woff2/Splav-BoldItalic.woff2') format('woff2'); }
 
 body { font-family: 'Splav', serif; }
 ```
@@ -63,4 +63,4 @@ It creates a Python environment in `.venv`, downloads the sources into `build/` 
 
 Splav is free and open: [SIL Open Font License 1.1](OFL.txt), with no Reserved Font Name. It is built on Averia Serif Libre and its Cyrillic is derived from 18 OFL fonts, all credited in `OFL.txt`. It does not use any of their reserved names, including "Averia".
 
-Made by Igor Kupchinenko, 2026.
+Made by [Igor Kupchinenko](https://kidpudel.github.io/personal-website/), 2026.

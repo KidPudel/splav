@@ -34,7 +34,7 @@ CONF = {
 }[STYLE]
 SOFT = not CONF['italic']
 FAMILY = 'Splav'
-VERSION = 0.2
+VERSION = 0.3
 REF = avg.MANIFEST['averiaseriflibre'][CONF['ref']]
 CAL = json.load(open(os.path.join(avg.BUILD, f"calib-{CONF['src']}-{CONF['ref']}.json")))
 AVERIA = TTFont(os.path.join(avg.BUILD, 'corpus', 'averiaseriflibre', f"AveriaSerifLibre-{CONF['file']}.ttf"))
@@ -106,6 +106,17 @@ for ch in UPPER + LOWER:
     glyphs[gname] = g
     order.append(gname)
     cmap[ord(ch)] = gname
+
+# № (numero sign, common in Russian text, missing from Averia): Averia's N
+# followed by its º.
+n_name, o_name = src_cmap[ord('N')], src_cmap[ord('º')]
+pen = TTGlyphPen(src_gs)
+pen.addComponent(n_name, (1, 0, 0, 1, 0, 0))
+pen.addComponent(o_name, (1, 0, 0, 1, metrics[n_name][0], 0))
+glyphs['uni2116'] = pen.glyph()
+advances['uni2116'] = metrics[n_name][0] + metrics[o_name][0]
+order.append('uni2116')
+cmap[0x2116] = 'uni2116'
 
 fb = FontBuilder(UPM, isTTF=True)
 fb.setupGlyphOrder(order)
