@@ -1,0 +1,5 @@
+fonttools==4.66.1
+skia-pathops
+numpy
+pillow
+brotli
