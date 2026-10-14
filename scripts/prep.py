@@ -1,4 +1,5 @@
-"""Make static instances of every corpus family: roman 300 and 400, italic 700."""
+"""Make static instances of every corpus family: roman 300, 400 and 700,
+italic 300, 400 and 700 (300 is only needed for Averia, the reference)."""
 import glob
 import json
 import os
@@ -14,6 +15,9 @@ os.makedirs(OUT, exist_ok=True)
 STATIC_NAMES = {
     ('roman', 300): ['Light'],
     ('roman', 400): ['Regular', 'Web-Regular'],
+    ('roman', 700): ['Bold', 'Web-Bold'],
+    ('italic', 300): ['LightItalic'],
+    ('italic', 400): ['Italic', 'Web-Italic'],
     ('italic', 700): ['BoldItalic', 'Web-BoldItalic'],
 }
 

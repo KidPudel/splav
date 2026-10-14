@@ -4,7 +4,16 @@ Every serif family on Google Fonts with Cyrillic was considered (67 families, Oc
 
 ## Averaged (18)
 
-Upright sources use each family's Regular (400); italic sources use Bold Italic (700). The average is then fitted to Averia Serif Libre Light and Bold Italic.
+Each Splav style averages the nearest weight that all 18 families have, then is fitted to the matching Averia Serif Libre style. Most sources have no Light, so the Light styles start from Regular and the fit makes them lighter.
+
+| Splav | Sources | Fitted to Averia |
+| --- | --- | --- |
+| Light | Regular (400) | Light |
+| Regular | Regular (400) | Regular |
+| Bold | Bold (700) | Bold |
+| Light Italic | Italic (400) | Light Italic |
+| Italic | Italic (400) | Italic |
+| Bold Italic | Bold Italic (700) | Bold Italic |
 
 | Family | Designers (from the font files) |
 | --- | --- |
@@ -37,4 +46,4 @@ Upright sources use each family's Regular (400); italic sources use Bold Italic 
 
 ## Per letter
 
-`build/report-light.json` and `build/report-bolditalic.json`, written by each build, list for every letter how many fonts were averaged and which were left out and why (different contour structure, a different form, or a far outlier).
+`build/report-<style>.json`, written by each build, list for every letter how many fonts were averaged and which were left out and why (different contour structure, a different form, or a far outlier).

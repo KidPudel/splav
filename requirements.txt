@@ -3,3 +3,5 @@ skia-pathops
 numpy
 pillow
 brotli
+scipy
+scikit-image

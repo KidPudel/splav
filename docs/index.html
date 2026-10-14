@@ -3,25 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Splav — Cyrillic for Averia Serif Libre</title>
-<meta name="description" content="Splav is a free Cyrillic companion to Averia Serif Libre, made by averaging 18 serif fonts. Type to try it.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;1,700&display=swap" rel="stylesheet">
+<title>Splav — Averia Serif Libre with Cyrillic</title>
+<meta name="description" content="Splav is Averia Serif Libre with Cyrillic, made by averaging 18 serif fonts. Free, six styles. Type to try it.">
 <style>
-  @font-face {
-    font-family: 'Splav';
-    src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.1.0/fonts/woff2/Splav-Light.woff2') format('woff2');
-    font-weight: 300;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Splav';
-    src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.1.0/fonts/woff2/Splav-BoldItalic.woff2') format('woff2');
-    font-weight: 700;
-    font-style: italic;
-    font-display: swap;
-  }
+  @font-face { font-family: 'Splav'; font-weight: 300; font-display: swap; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Light.woff2') format('woff2'); }
+  @font-face { font-family: 'Splav'; font-weight: 400; font-display: swap; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Regular.woff2') format('woff2'); }
+  @font-face { font-family: 'Splav'; font-weight: 700; font-display: swap; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Bold.woff2') format('woff2'); }
+  @font-face { font-family: 'Splav'; font-weight: 300; font-style: italic; font-display: swap; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-LightItalic.woff2') format('woff2'); }
+  @font-face { font-family: 'Splav'; font-weight: 400; font-style: italic; font-display: swap; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-Italic.woff2') format('woff2'); }
+  @font-face { font-family: 'Splav'; font-weight: 700; font-style: italic; font-display: swap; src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.2.0/fonts/woff2/Splav-BoldItalic.woff2') format('woff2'); }
 
   :root {
     --bg: #f6f3ec;
@@ -39,7 +29,7 @@
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font: 300 18px/1.5 'Averia Serif Libre', 'Splav', Georgia, serif;
+    font: 300 18px/1.5 'Splav', Georgia, serif;
   }
   main { max-width: 860px; margin: 0 auto; padding: 56px 20px 80px; }
 
@@ -64,13 +54,12 @@
   label { color: var(--muted); font-size: 15px; }
   input[type=range] { accent-color: var(--accent); vertical-align: middle; }
 
-  .sample { border-top: 1px solid var(--line); padding: 24px 0 28px; }
+  .sample { border-top: 1px solid var(--line); padding: 20px 0 24px; }
   .sample .tag { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
-  .sample .text { font-size: var(--size, 48px); line-height: 1.15; overflow-wrap: anywhere; }
-  .bi .text { font-weight: 700; font-style: italic; }
+  .sample .text { font-size: var(--size, 40px); line-height: 1.15; overflow-wrap: anywhere; }
 
   .abc { border-top: 1px solid var(--line); padding-top: 24px; font-size: 28px; line-height: 1.4; overflow-wrap: anywhere; }
-  .abc p { margin: 0 0 8px; }
+  .abc p { margin: 0 0 8px; font-weight: 400; }
 
   footer { margin-top: 56px; color: var(--muted); font-size: 15px; }
 </style>
@@ -78,7 +67,7 @@
 <body>
 <main>
   <h1>Splav</h1>
-  <p class="lede">A free Cyrillic companion to <a href="https://fonts.google.com/specimen/Averia+Serif+Libre">Averia Serif Libre</a>, made the way Averia was made: by averaging the letters of 18 serif fonts.</p>
+  <p class="lede"><a href="https://fonts.google.com/specimen/Averia+Serif+Libre">Averia Serif Libre</a> with Cyrillic, made the way Averia was made: by averaging the letters of 18 serif fonts. Free, six styles.</p>
   <p class="links">
     <a href="https://github.com/KidPudel/splav/releases/latest">Download</a> ·
     <a href="https://github.com/KidPudel/splav">GitHub</a> ·
@@ -86,27 +75,43 @@
   </p>
 
   <div class="controls">
-    <label for="size">Size <input id="size" type="range" min="16" max="120" value="48"></label>
+    <label for="size">Size <input id="size" type="range" min="16" max="120" value="40"></label>
   </div>
-  <textarea id="input" spellcheck="false" aria-label="Type your own text">В продуктовом дизайне я ищу странности</textarea>
+  <textarea id="input" spellcheck="false" aria-label="Type your own text">In product design, I look for oddities* — в продуктовом дизайне я ищу странности</textarea>
 
   <section class="sample">
-    <div class="tag">Light · Averia Serif Libre Light + Splav Light</div>
-    <div class="text" data-out></div>
+    <div class="tag">Light</div>
+    <div class="text" data-out style="font-weight: 300;"></div>
   </section>
-  <section class="sample bi">
-    <div class="tag">Bold Italic · Averia Serif Libre Bold Italic + Splav Bold Italic</div>
-    <div class="text" data-out></div>
+  <section class="sample">
+    <div class="tag">Regular</div>
+    <div class="text" data-out style="font-weight: 400;"></div>
+  </section>
+  <section class="sample">
+    <div class="tag">Bold</div>
+    <div class="text" data-out style="font-weight: 700;"></div>
+  </section>
+  <section class="sample">
+    <div class="tag">Light Italic</div>
+    <div class="text" data-out style="font-weight: 300; font-style: italic;"></div>
+  </section>
+  <section class="sample">
+    <div class="tag">Italic</div>
+    <div class="text" data-out style="font-weight: 400; font-style: italic;"></div>
+  </section>
+  <section class="sample">
+    <div class="tag">Bold Italic</div>
+    <div class="text" data-out style="font-weight: 700; font-style: italic;"></div>
   </section>
 
   <section class="abc">
     <p>АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ</p>
     <p>абвгдеёжзийклмнопрстуфхцчшщъыьэюя</p>
-    <p><b><i>АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ</i></b></p>
-    <p><b><i>абвгдеёжзийклмнопрстуфхцчшщъыьэюя</i></b></p>
+    <p><i>АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ</i></p>
+    <p><i>абвгдеёжзийклмнопрстуфхцчшщъыьэюя</i></p>
   </section>
 
-  <footer>Version 0.1 · Cyrillic letters only; Latin, digits and punctuation come from Averia · SIL Open Font License 1.1 · Igor Kupchinenko, 2026</footer>
+  <footer>Version 0.2 · Six styles · Latin, figures and punctuation from Averia, Cyrillic averaged · SIL Open Font License 1.1 · Igor Kupchinenko, 2026</footer>
 </main>
 <script>
   const input = document.getElementById('input');

@@ -1,30 +1,45 @@
-"""Build the Cyrillic companion to Averia: shared shapes from Averia itself,
-Cyrillic-only letters averaged across the corpus and calibrated to Averia.
+"""Build Splav: Averia Serif Libre with Cyrillic. Everything Averia has
+(Latin, digits, punctuation, kerning) is kept as it is; Cyrillic letters that
+share a shape with Latin reuse Averia's glyphs, and the Cyrillic-only letters
+are averaged across the corpus and fitted to Averia.
 
-Usage: build.py light|bolditalic
+Usage: build.py light|regular|bold|lightitalic|italic|bolditalic
 """
 import json
 import os
 import sys
 
 import numpy as np
+from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 from fontTools.fontBuilder import FontBuilder
-from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
+from fontTools.ttLib import TTFont
 
 import avg
+import soften
 from calibrate_tools import offset
 
 STYLE = sys.argv[1]
+# Each style averages the nearest weight the sources share (most have no
+# Light) and is fitted to the matching style of Averia. The upright averages
+# come out crisper than Averia, so they get the fitted softness (soften.py);
+# the italic averages already match it.
 CONF = {
     'light': {'src': 'roman400', 'ref': 'roman300', 'weight': 300, 'italic': False, 'sub': 'Light', 'file': 'Light'},
+    'regular': {'src': 'roman400', 'ref': 'roman400', 'weight': 400, 'italic': False, 'sub': 'Regular', 'file': 'Regular'},
+    'bold': {'src': 'roman700', 'ref': 'roman700', 'weight': 700, 'italic': False, 'sub': 'Bold', 'file': 'Bold'},
+    'lightitalic': {'src': 'italic400', 'ref': 'italic300', 'weight': 300, 'italic': True, 'sub': 'Light Italic', 'file': 'LightItalic'},
+    'italic': {'src': 'italic400', 'ref': 'italic400', 'weight': 400, 'italic': True, 'sub': 'Italic', 'file': 'Italic'},
     'bolditalic': {'src': 'italic700', 'ref': 'italic700', 'weight': 700, 'italic': True, 'sub': 'Bold Italic', 'file': 'BoldItalic'},
 }[STYLE]
+SOFT = not CONF['italic']
 FAMILY = 'Splav'
-VERSION = 0.1
+VERSION = 0.2
 REF = avg.MANIFEST['averiaseriflibre'][CONF['ref']]
 CAL = json.load(open(os.path.join(avg.BUILD, f"calib-{CONF['src']}-{CONF['ref']}.json")))
-UPM = 1000
+AVERIA = TTFont(os.path.join(avg.BUILD, 'corpus', 'averiaseriflibre', f"AveriaSerifLibre-{CONF['file']}.ttf"))
+UPM = AVERIA['head'].unitsPerEm
+SCALE = UPM / 1000  # averages are in a 1000-unit em
 
 # Cyrillic letters that share a shape with a Latin letter in Averia.
 SHARED = {
@@ -35,10 +50,10 @@ UPPER = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
 LOWER = UPPER.lower()
 
 
-def transform(shape, p):
+def transform(shape, p, d):
     out = []
     for c in shape['contours']:
-        c = offset(c, p['d'])
+        c = offset(c, d)
         out.append(np.stack([c[:, 0] * p['sx'] + c[:, 1] * p['k'], c[:, 1] * p['sy']], 1))
     return out, shape['advance'] * p['sx']
 
@@ -51,58 +66,69 @@ def spline_glyph(contours):
         closed = np.vstack([c, c[:1]])
         perim = np.sqrt((np.diff(closed, axis=0) ** 2).sum(1)).sum()
         n = max(24, int(perim / 11))
-        pts = avg.resample(c, n)
+        pts = avg.resample(c, n) * SCALE
         pen.qCurveTo(*[(round(x), round(y)) for x, y in pts], None)
         pen.closePath()
     return pen.glyph()
 
 
-def averia_glyph(char):
-    f = avg.font(REF)
-    gs = f.getGlyphSet()
-    name = f.getBestCmap()[ord(char)]
-    scale = UPM / f['head'].unitsPerEm
-    pen = TTGlyphPen(gs)
-    gs[name].draw(TransformPen(pen, (scale, 0, 0, scale, 0, 0)))
-    return pen.glyph(), gs[name].width * scale
-
-
-glyphs = {'.notdef': TTGlyphPen(None).glyph(), 'space': TTGlyphPen(None).glyph()}
-metrics = {'.notdef': (500, 0), 'space': (int(avg.glyph_shape(REF, ' ')['advance']) if avg.glyph_shape(REF, ' ') else 250, 0)}
-cmap = {32: 'space'}
+# Everything from Averia, unchanged.
+src_cmap = AVERIA.getBestCmap()
+src_gs = AVERIA.getGlyphSet()
+order = list(AVERIA.getGlyphOrder())
+glyphs, metrics, advances = {}, {}, {}
+for name in order:
+    pen = TTGlyphPen(src_gs)
+    src_gs[name].draw(pen)
+    glyphs[name] = pen.glyph()
+    metrics[name] = AVERIA['hmtx'][name]
+cmap = dict(src_cmap)
 report = {}
 
 for ch in UPPER + LOWER:
     gname = f'uni{ord(ch):04X}'
     if ch in SHARED:
-        g, adv = averia_glyph(SHARED[ch])
+        base = src_cmap[ord(SHARED[ch])]
+        pen = TTGlyphPen(src_gs)
+        pen.addComponent(base, (1, 0, 0, 1, 0, 0))
+        g = pen.glyph()
+        advances[gname] = metrics[base][0]
         report[ch] = 'averia:' + SHARED[ch]
     else:
         mean = avg.corpus_average(ch, CONF['src'])
-        contours, adv = transform(mean, CAL['upper' if ch in UPPER else 'lower'])
+        p = CAL['upper' if ch in UPPER else 'lower']
+        contours, adv = transform(mean, p, p['soft']['d'] if SOFT else p['d'])
+        if SOFT:
+            contours, _ = soften.soften(contours, mean['sig'][0], p['soft']['sigma'], p['soft']['t'])
         g = spline_glyph(contours)
+        advances[gname] = round(adv * SCALE)
         report[ch] = f"avg {mean['used']}/{mean['of']}" + (f" dropped {','.join(mean.get('dropped', []))}" if mean.get('dropped') else '')
-    g.recalcBounds(None)
     glyphs[gname] = g
-    metrics[gname] = (round(adv), g.xMin if hasattr(g, 'xMin') else 0)
+    order.append(gname)
     cmap[ord(ch)] = gname
 
-order = list(glyphs)
 fb = FontBuilder(UPM, isTTF=True)
 fb.setupGlyphOrder(order)
 fb.setupCharacterMap(cmap)
 fb.setupGlyf(glyphs)
+glyf = fb.font['glyf']
+for name, adv in advances.items():
+    glyf[name].recalcBounds(glyf)
+    metrics[name] = (adv, getattr(glyf[name], 'xMin', 0))
 fb.setupHorizontalMetrics(metrics)
-fb.setupHorizontalHeader(ascent=890, descent=-227)
+# Vertical metrics, PANOSE and gasp exactly as in Averia, so lines set the same.
+ah, ao = AVERIA['hhea'], AVERIA['OS/2']
+fb.setupHorizontalHeader(ascent=ah.ascent, descent=ah.descent, lineGap=ah.lineGap)
+
 # Bold, Italic and Bold Italic are style-linked under the family name; any
 # other weight (Light) gets its own legacy family, with the shared one in
 # the typographic names (16/17), so apps group and select styles correctly.
 RIBBI = CONF['sub'] in ('Regular', 'Italic', 'Bold', 'Bold Italic')
-legacy_family = FAMILY if RIBBI else f"{FAMILY} {CONF['sub']}"
-legacy_style = CONF['sub'] if RIBBI else 'Regular'
+legacy_family = FAMILY if RIBBI else f"{FAMILY} {CONF['sub'].replace(' Italic', '')}"
+legacy_style = CONF['sub'] if RIBBI else ('Italic' if CONF['italic'] else 'Regular')
 ps_name = f"{FAMILY}-{CONF['file']}"
 names = {
-    'copyright': 'Copyright 2026 Igor Kupchinenko. Cyrillic averaged from 18 SIL OFL serif families (see OFL.txt); Latin-shared shapes from Averia Serif Libre, Copyright (c) 2011 Dan Sayers.',
+    'copyright': 'Copyright 2026 Igor Kupchinenko. Cyrillic averaged from 18 SIL OFL serif families (see OFL.txt). Latin, figures, punctuation and kerning from Averia Serif Libre, Copyright (c) 2011, Dan Sayers (i@iotic.com).',
     'familyName': legacy_family,
     'styleName': legacy_style,
     'uniqueFontIdentifier': f"{VERSION:.3f};NONE;{ps_name}",
@@ -110,7 +136,7 @@ names = {
     'version': f"Version {VERSION:.3f}",
     'psName': ps_name,
     'designer': 'Igor Kupchinenko',
-    'description': 'Splav: a Cyrillic companion to Averia Serif Libre, made by averaging, like Averia.',
+    'description': 'Splav: Averia Serif Libre with Cyrillic, made by averaging, like Averia.',
     'licenseDescription': 'This Font Software is licensed under the SIL Open Font License, Version 1.1.',
     'licenseInfoURL': 'https://openfontlicense.org',
 }
@@ -122,22 +148,40 @@ bold = CONF['weight'] >= 700
 fsSel = (0x01 if CONF['italic'] else 0) | (0x20 if bold else 0) or 0x40
 fb.setupOS2(
     version=4, achVendID='NONE', fsType=0,  # OFL: installable embedding
-    usWeightClass=CONF['weight'], fsSelection=fsSel | 0x80,  # USE_TYPO_METRICS
-    sTypoAscender=890, sTypoDescender=-227, sTypoLineGap=0, usWinAscent=890, usWinDescent=227,
-    sxHeight=glyphs['uni0445'].yMax, sCapHeight=glyphs['uni041D'].yMax,
-    ulCodePageRange1=(1 << 2), ulCodePageRange2=0,  # 1251 Cyrillic
+    usWeightClass=CONF['weight'], fsSelection=fsSel,
+    sTypoAscender=ao.sTypoAscender, sTypoDescender=ao.sTypoDescender, sTypoLineGap=ao.sTypoLineGap,
+    usWinAscent=ao.usWinAscent, usWinDescent=ao.usWinDescent,
+    sxHeight=glyf[src_cmap[ord('x')]].yMax, sCapHeight=glyf[src_cmap[ord('H')]].yMax,
+    panose=ao.panose,
 )
-fb.setupPost(italicAngle=-6.9 if CONF['italic'] else 0)
+fb.font['OS/2'].recalcUnicodeRanges(fb.font)
+fb.font['OS/2'].recalcCodePageRanges(fb.font)
+fb.setupPost(italicAngle=round(AVERIA['post'].italicAngle, 1))
 fb.font['head'].fontRevision = VERSION
 fb.font['head'].macStyle = (0x01 if bold else 0) | (0x02 if CONF['italic'] else 0)
+fb.font['gasp'] = AVERIA['gasp']
+
+# Kerning: Averia's pairs (its kern subtables add up), plus the same pairs
+# for Cyrillic letters that are Averia's Latin shapes.
+pairs = {}
+for sub in AVERIA['kern'].kernTables:
+    for pair, v in sub.kernTable.items():
+        pairs[pair] = pairs.get(pair, 0) + v
+alias = {}
+for ch, lat in SHARED.items():
+    alias.setdefault(src_cmap[ord(lat)], []).append(f'uni{ord(ch):04X}')
+for (a, b), v in list(pairs.items()):
+    for a2 in [a] + alias.get(a, []):
+        for b2 in [b] + alias.get(b, []):
+            pairs.setdefault((a2, b2), v)
+fea = 'feature kern {\n' + ''.join(f'  pos {a} {b} {v};\n' for (a, b), v in sorted(pairs.items()) if v) + '} kern;\n'
+addOpenTypeFeaturesFromString(fb.font, fea)
+
 out = os.path.join(avg.ROOT, 'fonts', 'ttf', f"{FAMILY}-{CONF['file']}.ttf")
 fb.save(out)
 woff2 = os.path.join(avg.ROOT, 'fonts', 'woff2', f"{FAMILY}-{CONF['file']}.woff2")
-from fontTools.ttLib import TTFont as _T
-_f = _T(out)
-_f.flavor = 'woff2'
-_f.save(woff2)
+web = TTFont(out)
+web.flavor = 'woff2'
+web.save(woff2)
 json.dump(report, open(os.path.join(avg.BUILD, f'report-{STYLE}.json'), 'w'), ensure_ascii=False, indent=1)
-print(out)
-for k, v in report.items():
-    print(k, v)
+print(out, f'{len(order)} glyphs, {len(pairs)} kerning pairs')

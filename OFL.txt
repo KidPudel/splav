@@ -1,7 +1,8 @@
 Copyright 2026 Igor Kupchinenko.
 No Reserved Font Name.
 
-Splav includes outlines from Averia Serif Libre:
+Splav is built on Averia Serif Libre (its Latin, figures, punctuation,
+symbols and kerning are Averia's):
 Copyright (c) 2011, Dan Sayers (i@iotic.com),
 with Reserved Font Name 'Averia' and 'Averia Libre'.
 Splav does not use those names.
