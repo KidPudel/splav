@@ -21,6 +21,7 @@ CONF = {
     'bolditalic': {'src': 'italic700', 'ref': 'italic700', 'weight': 700, 'italic': True, 'sub': 'Bold Italic', 'file': 'BoldItalic'},
 }[STYLE]
 FAMILY = 'Splav'
+VERSION = 0.1
 REF = avg.MANIFEST['averiaseriflibre'][CONF['ref']]
 CAL = json.load(open(os.path.join(avg.BUILD, f"calib-{CONF['src']}-{CONF['ref']}.json")))
 UPM = 1000
@@ -93,19 +94,42 @@ fb.setupCharacterMap(cmap)
 fb.setupGlyf(glyphs)
 fb.setupHorizontalMetrics(metrics)
 fb.setupHorizontalHeader(ascent=890, descent=-227)
-fb.setupNameTable({
-    'familyName': FAMILY,
-    'styleName': CONF['sub'],
+# Bold, Italic and Bold Italic are style-linked under the family name; any
+# other weight (Light) gets its own legacy family, with the shared one in
+# the typographic names (16/17), so apps group and select styles correctly.
+RIBBI = CONF['sub'] in ('Regular', 'Italic', 'Bold', 'Bold Italic')
+legacy_family = FAMILY if RIBBI else f"{FAMILY} {CONF['sub']}"
+legacy_style = CONF['sub'] if RIBBI else 'Regular'
+ps_name = f"{FAMILY}-{CONF['file']}"
+names = {
     'copyright': 'Copyright 2026 Igor Kupchinenko. Cyrillic averaged from 18 SIL OFL serif families (see OFL.txt); Latin-shared shapes from Averia Serif Libre, Copyright (c) 2011 Dan Sayers.',
-    'version': 'Version 0.1',
+    'familyName': legacy_family,
+    'styleName': legacy_style,
+    'uniqueFontIdentifier': f"{VERSION:.3f};NONE;{ps_name}",
+    'fullName': f"{FAMILY} {CONF['sub']}",
+    'version': f"Version {VERSION:.3f}",
+    'psName': ps_name,
     'designer': 'Igor Kupchinenko',
     'description': 'Splav: a Cyrillic companion to Averia Serif Libre, made by averaging, like Averia.',
     'licenseDescription': 'This Font Software is licensed under the SIL Open Font License, Version 1.1.',
     'licenseInfoURL': 'https://openfontlicense.org',
-})
-fsSel = (0x01 if CONF['italic'] else 0) | (0x20 if CONF['weight'] >= 700 else 0) or 0x40
-fb.setupOS2(usWeightClass=CONF['weight'], sTypoAscender=890, sTypoDescender=-227, usWinAscent=890, usWinDescent=227, fsSelection=fsSel, sxHeight=0, sCapHeight=0)
+}
+if not RIBBI:
+    names['typographicFamily'] = FAMILY
+    names['typographicSubfamily'] = CONF['sub']
+fb.setupNameTable(names)
+bold = CONF['weight'] >= 700
+fsSel = (0x01 if CONF['italic'] else 0) | (0x20 if bold else 0) or 0x40
+fb.setupOS2(
+    version=4, achVendID='NONE', fsType=0,  # OFL: installable embedding
+    usWeightClass=CONF['weight'], fsSelection=fsSel | 0x80,  # USE_TYPO_METRICS
+    sTypoAscender=890, sTypoDescender=-227, sTypoLineGap=0, usWinAscent=890, usWinDescent=227,
+    sxHeight=glyphs['uni0445'].yMax, sCapHeight=glyphs['uni041D'].yMax,
+    ulCodePageRange1=(1 << 2), ulCodePageRange2=0,  # 1251 Cyrillic
+)
 fb.setupPost(italicAngle=-6.9 if CONF['italic'] else 0)
+fb.font['head'].fontRevision = VERSION
+fb.font['head'].macStyle = (0x01 if bold else 0) | (0x02 if CONF['italic'] else 0)
 out = os.path.join(avg.ROOT, 'fonts', 'ttf', f"{FAMILY}-{CONF['file']}.ttf")
 fb.save(out)
 woff2 = os.path.join(avg.ROOT, 'fonts', 'woff2', f"{FAMILY}-{CONF['file']}.woff2")
