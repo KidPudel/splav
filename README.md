@@ -8,6 +8,8 @@ The name is about the method and the material: many fonts melted into one, and t
 
 ![Splav next to Averia](specimens/splav.png)
 
+**[Try it in the browser](https://kidpudel.github.io/splav/)** · **[Download](https://github.com/KidPudel/splav/releases/latest)**
+
 ## Status
 
 Version 0.1. Two styles, Cyrillic only (А–я, Ё ё):
@@ -17,22 +19,37 @@ Version 0.1. Two styles, Cyrillic only (А–я, Ё ё):
 | Light | Averia Serif Libre Light | `fonts/ttf/Splav-Light.ttf`, `fonts/woff2/Splav-Light.woff2` |
 | Bold Italic | Averia Serif Libre Bold Italic | `fonts/ttf/Splav-BoldItalic.ttf`, `fonts/woff2/Splav-BoldItalic.woff2` |
 
-There is no kerning, no Latin, digits or punctuation yet: use Splav next to Averia, which supplies those. On the web, give Splav `unicode-range: U+0400-045F` under the same family name as Averia:
+There is no kerning, no Latin, digits or punctuation yet: use Splav next to Averia, which supplies those.
+
+## Use on the web
+
+Load Averia from Google Fonts and Splav from jsDelivr, then list Averia first. Averia has no Cyrillic, so the browser takes the Cyrillic letters from Splav:
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;1,700&display=swap" rel="stylesheet">
+```
 
 ```css
 @font-face {
-  font-family: 'Averia + Splav';
-  src: url('AveriaSerifLibre-Light.woff2') format('woff2');
+  font-family: 'Splav';
+  src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.1.0/fonts/woff2/Splav-Light.woff2') format('woff2');
   font-weight: 300;
 }
 
 @font-face {
-  font-family: 'Averia + Splav';
-  src: url('Splav-Light.woff2') format('woff2');
+  font-family: 'Splav';
+  src: url('https://cdn.jsdelivr.net/gh/KidPudel/splav@v0.1.0/fonts/woff2/Splav-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+}
+
+body {
+  font-family: 'Averia Serif Libre', 'Splav', serif;
   font-weight: 300;
-  unicode-range: U+0400-045F;
 }
 ```
+
+On the desktop, install the `.ttf` files from the [download](https://github.com/KidPudel/splav/releases/latest) and set Cyrillic text in Splav, Latin in Averia Serif Libre.
 
 ## How it is made
 
